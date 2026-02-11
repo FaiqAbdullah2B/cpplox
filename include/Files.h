@@ -7,8 +7,8 @@
 namespace fs = std::filesystem;
 
 class Files {
-    public:
+public:
     std::vector<std::byte> readAllBytes(const fs::path& path);
-    private:
+private:
 
 };

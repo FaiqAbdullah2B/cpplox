@@ -19,6 +19,7 @@ set(SOURCES
     src/main.cpp
     src/Lox.cpp
     src/Files.cpp
+    src/Scanner.cpp
     # Add more source files here as you create them
 )
 
