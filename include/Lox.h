@@ -10,6 +10,7 @@
 
 class Lox {
 public:
+    Lox() : hadError(false) {}
     void runFile(std::string path); // the path of the file to be interpreted
     void runPrompt();
 
@@ -17,5 +18,6 @@ public:
 private:
     void run(std::string_view source);
 
+    bool hadError;
     void report(int line, std::string where, std::string message);
 };

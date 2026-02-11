@@ -8,6 +8,9 @@ void Lox::runFile(std::string path) {
     std::string_view view(reinterpret_cast<const char*>(bytes.data()), bytes.size());
 
     run(view);
+
+    if (hadError)
+        throw std::runtime_error("Error found in File");
 }
 
 void Lox::runPrompt() {
@@ -17,7 +20,8 @@ void Lox::runPrompt() {
 
     while (std::getline(std::cin, line)) {
         if (!line.empty()) {
-             run(line);
+            run(line);
+            hadError = false;
         }
         
         std::cout << "> ";
@@ -41,4 +45,5 @@ void Lox::error (int line, std::string message){
 
 void Lox::report (int line, std::string where, std::string message) {
     std::cout << "[line " << line << "] Error" << where << ": " << "message\n"; 
+    hadError = true;
 }
