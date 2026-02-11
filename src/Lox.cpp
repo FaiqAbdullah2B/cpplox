@@ -35,7 +35,7 @@ void Lox::run(std::string_view source) {
     std::vector<Token> tokens = scanner.scanTokens();
 
     for (Token token : tokens) {
-        std::cout << tokenToString(token) << "\n";
+        std::cout << token.toString() << "\n";
     }
 }
 
@@ -44,6 +44,6 @@ void Lox::error (int line, std::string message){
 }
 
 void Lox::report (int line, std::string where, std::string message) {
-    std::cout << "[line " << line << "] Error" << where << ": " << "message\n"; 
+    std::cout << "[line " << line << "] Error" << where << ": " << message << "\n"; 
     hadError = true;
 }
