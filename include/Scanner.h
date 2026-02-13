@@ -2,6 +2,7 @@
 #include <Token.h>
 #include <vector>
 #include <variant>
+#include <Lox.h>
 
 class Scanner {
 public:
@@ -9,6 +10,7 @@ public:
 
     std::vector<Token> scanTokens();
 private:
+
     std::string_view source;
     std::vector<Token> tokens;
 
@@ -21,6 +23,9 @@ private:
     }
 
     void scanToken();
+
+    void identifier();
+    void number();
     char advance();
 
     void addToken(TokenType type) {
@@ -31,4 +36,12 @@ private:
         std::string_view text = source.substr(start, current - start);
         tokens.emplace_back(type, std::string(text), literal, line);
     }
+
+    bool match(char expected);
+    char peek();
+    char peekNext();
+    bool isAlpha(char c);
+    bool isDigit(char c);
+    bool isAlphaNumeric(char c);
+    void scanString();
 };

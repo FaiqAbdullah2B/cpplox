@@ -10,14 +10,14 @@
 
 class Lox {
 public:
-    Lox() : hadError(false) {}
+    Lox(){}
     void runFile(std::string path); // the path of the file to be interpreted
     void runPrompt();
 
-    void error (int line, std::string message);
+    static void error (int line, std::string message);
 private:
     void run(std::string_view source);
 
-    bool hadError;
-    void report(int line, std::string where, std::string message);
+    static bool hadError;
+    static void report(int line, std::string where, std::string message);
 };

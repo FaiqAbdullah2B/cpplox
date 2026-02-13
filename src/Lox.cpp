@@ -1,5 +1,7 @@
 #include "Lox.h"
 
+bool Lox::hadError = false;
+
 void Lox::runFile(std::string path) {
     Files handler;
     std::vector<std::byte> bytes = handler.readAllBytes(path);
