@@ -77,6 +77,10 @@ void Scanner::scanToken() {
     
 }
 
+void Scanner::identifier() {
+    
+}
+
 void Scanner::number() {
     while(isDigit(peek())) advance();
 

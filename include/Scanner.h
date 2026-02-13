@@ -1,3 +1,4 @@
+#pragma once
 #include <string_view>
 #include <Token.h>
 #include <vector>
@@ -14,8 +15,8 @@ private:
     std::string_view source;
     std::vector<Token> tokens;
 
-    int start = 0;
-    int current = 0;
+    long unsigned int start = 0;
+    long unsigned int current = 0;
     int line = 1;
 
     bool isAtEnd() {
