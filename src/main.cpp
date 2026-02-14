@@ -8,7 +8,13 @@ int main (int argc, char* argv[]) {
         std::cout << "Usage: " << argv[0] << " [script]\n";
         return 64; // EX_USAGE
     } else if (argc == 2) {
-        lox.runFile(argv[1]);
+        try {
+            lox.runFile(argv[1]);
+        } catch(std::runtime_error &e) {
+            std::cerr << e.what();
+            return 1;
+        }
+        
     } else { 
         lox.runPrompt();
     }

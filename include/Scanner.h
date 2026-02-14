@@ -1,9 +1,12 @@
 #pragma once
 #include <string_view>
-#include <Token.h>
+#include <unordered_map>
 #include <vector>
 #include <variant>
+
 #include <Lox.h>
+#include <Token.h>
+
 
 class Scanner {
 public:
@@ -11,9 +14,11 @@ public:
 
     std::vector<Token> scanTokens();
 private:
-
+    
     std::string_view source;
     std::vector<Token> tokens;
+
+    static const std::unordered_map<std::string, TokenType> keywords;
 
     long unsigned int start = 0;
     long unsigned int current = 0;

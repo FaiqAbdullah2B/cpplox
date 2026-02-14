@@ -46,6 +46,8 @@ void Scanner::scanToken() {
             // A comment goes until the end of the line.
                 while (peek() != '\n' && !isAtEnd()) 
                 advance();
+            } else if (match('*')) {
+
             } else {
                 addToken(SLASH);
             }
@@ -78,7 +80,34 @@ void Scanner::scanToken() {
 }
 
 void Scanner::identifier() {
-    
+    static const std::unordered_map<std::string, TokenType> keywords = {
+        {"and",    TokenType::AND},
+        {"class",  TokenType::CLASS},
+        {"else",   TokenType::ELSE},
+        {"false",  TokenType::FALSE},
+        {"for",    TokenType::FOR},
+        {"fun",    TokenType::FUN},
+        {"if",     TokenType::IF},
+        {"nil",    TokenType::NIL},
+        {"or",     TokenType::OR},
+        {"print",  TokenType::PRINT},
+        {"return", TokenType::RETURN},
+        {"super",  TokenType::SUPER},
+        {"this",   TokenType::THIS},
+        {"true",   TokenType::TRUE},
+        {"var",    TokenType::VAR},
+        {"while",  TokenType::WHILE}
+    };
+
+    while (isAlphaNumeric(peek())) advance();
+
+    std::string text{ source.substr(start, current - start) };
+
+    auto it = keywords.find(text);
+    TokenType type = (it != keywords.end()) ? it->second : TokenType::IDENTIFIER;
+
+    addToken(type);
+
 }
 
 void Scanner::number() {

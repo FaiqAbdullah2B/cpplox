@@ -11,6 +11,8 @@ std::vector<std::byte> Files::readAllBytes(const fs::path &path) {
         throw std::runtime_error("Could not find file.");
     }
 
+    file.seekg(0, std::ios::end);
+    
     auto size = file.tellg();
 
     if (size == -1) {
