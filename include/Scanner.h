@@ -38,7 +38,7 @@ private:
         addToken(type, std::monostate{});
     }
 
-    void addToken(TokenType type, Literal literal) {
+    void addToken(TokenType type, LiteralType literal) {
         std::string_view text = source.substr(start, current - start);
         tokens.emplace_back(type, std::string(text), literal, line);
     }

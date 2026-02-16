@@ -6,11 +6,11 @@
 #include <iostream>
 #include <TokenType.h>
 
-using Literal = std::variant<std::monostate, double, std::string, bool>;
+using LiteralType = std::variant<std::monostate, double, std::string, bool>;
 
 class Token {  
 public: 
-    Token(TokenType type, std::string lexeme, Literal literal, int line)
+    Token(TokenType type, std::string lexeme, LiteralType literal, int line)
         : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)), line(line) {}
 
     [[nodiscard]] std::string toString() const {
@@ -34,6 +34,6 @@ public:
 private:
     const TokenType type;
     const std::string lexeme;
-    const Literal literal;
+    const LiteralType literal;
     const int line;
 };
