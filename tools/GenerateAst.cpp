@@ -73,7 +73,55 @@ void defineType(
     std::ofstream& writer, std::string_view baseName,
     std::string_view className, std::string_view fieldList
 ) {
+    writer << "struct public " << className << " : public " << baseName << " {\n";
 
+    // parsing the fields
+    std::vector<std::string_view> fields;
+    size_t start = 0;
+    while (start < fieldList.length()) {
+        size_t comma = fieldList.find(",", start);
+
+        // comma not found
+        if (comma == std::string_view::npos) {
+            fields.push_back(fieldList.substr(start));
+            break;
+        }
+
+        fields.push_back(fieldList.substr(start, comma - start));
+
+        start = comma + 2; // one for the comma and one for the white space
+    }
+
+    // constructor
+    writer << "    " << className << "(" << fieldList << ")\n";
+
+    if (!fields.empty()) {
+        writer << "        : ";
+        for (size_t i = 0; i < fields.size(); i++) {
+            std::string_view field = fields[i];
+
+            // Extract just the variable name (e.g., "left" from "Expr left")
+            size_t spacePos = field.find_last_of(' ');
+            std::string_view name = field.substr(spacePos + 1);
+
+            writer << name << "(std::move(" << name << "))";
+            
+            if (i < fields.size() - 1) {
+                writer << ", ";
+            }
+        }
+        writer << " {}\n\n";
+    } else {
+        writer << "    {}\n\n";
+    }
+
+    //The Fields
+    for (std::string_view field : fields) {
+        writer << "    " << field << ";\n";
+    }
+
+    writer << "};\n\n";
+    
 }
 
 int main (int argc, char* argv[]){
