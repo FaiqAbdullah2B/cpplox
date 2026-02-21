@@ -40,16 +40,25 @@ void defineAst(
     writer << "\n";
     writer << "#include <vector>\n";
     writer << "#include <memory>\n";
+    writer << "#include <variant>\n";
     writer << "\n" << "#include \"Token.h\"\n"; 
     writer << "\n";
 
 
     writer << "namespace lox {\n"; 
     writer << "\n";
+
     // The Base Abstract Class
-    writer << "struct " << baseName << " {\n";
-    writer << "    virtual ~" << baseName << "() = default;\n"; 
-    
+    // Ok i am going to comment this shit out 
+    // Because I am using variants
+
+    // writer << "struct " << baseName << " {\n";
+    // writer << "    virtual ~" << baseName << "() = default;\n"; 
+
+    // gotta forward declare the classes for variants
+
+    writer << "struct Expr;\n\n";
+
     for (std::string_view type : types)  {
         size_t colonPos = type.find(':');
 
@@ -64,7 +73,6 @@ void defineAst(
     }
     
     // Closing the class
-    writer << "};\n";
     writer << "\n";
     writer << "} // namespace lox\n";
 }
@@ -72,8 +80,11 @@ void defineAst(
 void defineType(
     std::ofstream& writer, std::string_view baseName,
     std::string_view className, std::string_view fieldList
-) {
-    writer << "struct public " << className << " : public " << baseName << " {\n";
+) { 
+    // comment this out too because we are not gonna use basic visitors
+    // writer << "struct public " << className << " : public " << baseName << " {\n";
+
+    writer << "struct " << className << " {\n";
 
     // parsing the fields
     std::vector<std::string_view> fields;
@@ -90,6 +101,11 @@ void defineType(
         fields.push_back(fieldList.substr(start, comma - start));
 
         start = comma + 2; // one for the comma and one for the white space
+    }
+
+    //The Fields
+    for (std::string_view field : fields) {
+        writer << "    " << field << ";\n";
     }
 
     // constructor
@@ -113,11 +129,6 @@ void defineType(
         writer << " {}\n\n";
     } else {
         writer << "    {}\n\n";
-    }
-
-    //The Fields
-    for (std::string_view field : fields) {
-        writer << "    " << field << ";\n";
     }
 
     writer << "};\n\n";
