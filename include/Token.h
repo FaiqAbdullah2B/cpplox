@@ -31,7 +31,7 @@ public:
 
         return std::string(tokenTypeToString(type)) + " " + lexeme + " " + literalStr;
     } 
-private:
+// private:
     const TokenType type;
     const std::string lexeme;
     const LiteralType literal;
