@@ -10,9 +10,22 @@ std::unique_ptr<Expr> Parser::parse() {
 }
 
 std::unique_ptr<lox::Expr> Parser::expression() {
-    return equality();
+    return comma();
 }
 
+std::unique_ptr<Expr> Parser::comma() {
+    std::unique_ptr<Expr> expr = equality();
+
+    while (match({TokenType::COMMA})) {
+        Token op = previous();
+        std::unique_ptr<lox::Expr> right = equality();
+        expr = std::make_unique<lox::Expr>(
+            Binary(std::move(expr), op, std::move(right))
+        );
+    }
+
+    return expr;
+}
 
 std::unique_ptr<lox::Expr> Parser::equality() {
     
