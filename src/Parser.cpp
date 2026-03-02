@@ -1,9 +1,18 @@
 #include "Parser.h"
 using namespace lox;
 
+std::unique_ptr<Expr> Parser::parse() {
+    try {
+        return expression();
+    } catch (const ParseError& error) {
+        return nullptr;
+    }
+}
+
 std::unique_ptr<lox::Expr> Parser::expression() {
     return equality();
 }
+
 
 std::unique_ptr<lox::Expr> Parser::equality() {
     
@@ -101,11 +110,13 @@ std::unique_ptr<lox::Expr> Parser::primary() {
 
     if (match({TokenType::LEFT_PAREN})) {
         std::unique_ptr<lox::Expr> expr = expression();
-        // consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
         return std::make_unique<lox::Expr>(
             Grouping(std::move(expr))
         );
     }
+
+    throw error(peek(), "Expect Expression.");
 }
 
 bool Parser::match(std::initializer_list<TokenType> types) {
@@ -140,9 +151,38 @@ Token Parser::previous() const {
     return tokens.at(current-1);
 }
 
-// Token Parser::consume(TokenType type, std::string message) {
-//     if (check(type)) return advance();
-//     std::cout << message.length();
-//     return Token;
-//     // throw error(peek(), message);
-// }
+Token Parser::consume(TokenType type, std::string message) {
+    if (check(type)) return advance();
+    
+    throw error(peek(), message);
+}
+
+Parser::ParseError Parser::error(const Token& token, std::string_view message) {
+    Lox::error(token, std::string(message));
+    
+    return ParseError();
+}
+
+void Parser::synchronize() {
+    advance();
+
+    while(!isAtEnd()) {
+        if (previous().type == TokenType::SEMICOLON) return;
+
+        switch (peek().type) {
+            case TokenType::CLASS:
+            case TokenType::FUN:
+            case TokenType::VAR:
+            case TokenType::FOR:
+            case TokenType::IF:
+            case TokenType::WHILE:
+            case TokenType::PRINT:
+            case TokenType::RETURN:
+                return;
+            default:
+                break;
+        }
+
+        advance();
+    }
+}

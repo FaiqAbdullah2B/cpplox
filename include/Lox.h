@@ -4,9 +4,10 @@
 #include <iostream>
 #include <string_view>
 
-#include <Files.h>
-#include <Scanner.h>
-#include <Token.h>
+#include "Files.h"
+#include "Scanner.h"
+#include "Token.h"
+#include "Parser.h"
 
 class Lox {
 public:
@@ -15,6 +16,7 @@ public:
     void runPrompt();
 
     static void error (int line, std::string message);
+    static void error (const Token& token, const std::string& message);
 private:
     void run(std::string_view source);
 

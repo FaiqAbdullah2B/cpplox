@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -46,25 +47,4 @@ private:
         return ss.str();
     }
 };
-
-int main() {
-    // Build the tree: (* (- 123) (group 45.67))
-    // We construct the Tokens INLINE now. No more missing variables.
-    
-    lox::Expr expression = lox::Binary(
-        // Left: Unary (- 123)
-        std::make_unique<lox::Expr>(lox::Unary(
-            Token(TokenType::MINUS, "-", std::monostate{}, 1), 
-            std::make_unique<lox::Expr>(lox::Literal(123.0))
-        )),
-        // Operator: *
-        Token(TokenType::STAR, "*", std::monostate{}, 1),
-        // Right: Grouping (45.67)
-        std::make_unique<lox::Expr>(lox::Grouping(
-            std::make_unique<lox::Expr>(lox::Literal(45.67))
-        ))
-    );
-
-    AstPrinter printer;
-    std::cout << printer.print(expression) << "\n";
-}
+ 

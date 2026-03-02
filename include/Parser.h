@@ -6,12 +6,18 @@
 #include "Token.h"
 #include "TokenType.h"
 #include "Expr.h"
+#include "Lox.h"
 
 class Parser {
 public:
-    explicit Parser(const std::vector<Token>& tokens) : tokens(tokens) {}
-
+    explicit Parser(const std::vector<Token>& tokens) : tokens(std::move(tokens)) {}
+    std::unique_ptr<lox::Expr> parse();
 private:
+    class ParseError : public std::runtime_error {
+    public:
+        ParseError() : std::runtime_error("Parse error") {}
+    };
+    
     const std::vector<Token>& tokens;
     size_t current = 0;
 
@@ -30,4 +36,9 @@ private:
     Token peek() const;
     Token previous() const;
     Token consume(TokenType type, std::string message);
+
+    ParseError error(const Token& token, std::string_view message);
+
+    void synchronize();
+
 };

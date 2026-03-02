@@ -51,21 +51,9 @@ target_include_directories(cpplox
         ${AST_OUT_DIR} # Allows #include "Expr.h"
 )
 
-# B. The AST Printer (Debug Tool)
-# This is a separate executable that runs your AstPrinter.cpp main()
-add_executable(debug_ast src/AstPrinter.cpp ${AST_OUT_DIR}/Expr.h)
-
-target_include_directories(debug_ast 
-    PRIVATE 
-        ${PROJECT_SOURCE_DIR}/include
-        ${AST_OUT_DIR}
-)
-
 # --- COMPILER OPTIONS ---
 if(MSVC)
     target_compile_options(cpplox PRIVATE /W4)
-    target_compile_options(debug_ast PRIVATE /W4)
 else()
     target_compile_options(cpplox PRIVATE -Wall -Wextra -Wpedantic)
-    target_compile_options(debug_ast PRIVATE -Wall -Wextra -Wpedantic)
 endif()

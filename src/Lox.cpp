@@ -1,4 +1,6 @@
 #include "Lox.h"
+#include "AstPrinter.h"
+#include "Expr.h"
 
 bool Lox::hadError = false;
 
@@ -36,8 +38,13 @@ void Lox::run(std::string_view source) {
     Scanner scanner(source);
     std::vector<Token> tokens = scanner.scanTokens();
 
-    for (Token token : tokens) {
-        std::cout << token.toString() << "\n";
+    Parser parser(std::move(tokens));
+    std::unique_ptr<lox::Expr> expression = parser.parse();
+
+    if (hadError) return;
+    if (expression != nullptr) {
+        AstPrinter printer;
+        std::cout << printer.print(*expression) << "\n";
     }
 }
 
@@ -48,4 +55,12 @@ void Lox::error (int line, std::string message){
 void Lox::report (int line, std::string where, std::string message) {
     std::cout << "[line " << line << "] Error" << where << ": " << message << "\n"; 
     hadError = true;
+}
+
+void Lox::error(const Token& token, const std::string& message) {
+    if (token.type == TokenType::EOF_TOKEN) {
+        report(token.line, " at end", message);
+    } else {
+        report(token.line, " at '" + token.lexeme + "'", message);
+    }
 }
