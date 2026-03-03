@@ -23,6 +23,7 @@ private:
 
     std::unique_ptr<lox::Expr> expression();
     std::unique_ptr<lox::Expr> comma();
+    std::unique_ptr<lox::Expr> ternary();
     std::unique_ptr<lox::Expr> equality();
     std::unique_ptr<lox::Expr> comparison();
     std::unique_ptr<lox::Expr> term();

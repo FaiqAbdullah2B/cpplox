@@ -156,7 +156,8 @@ int main (int argc, char* argv[]){
         "Binary   : std::unique_ptr<Expr> left, Token loxperator, std::unique_ptr<Expr> right",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal  : LiteralType value",
-        "Unary    : Token loxperator, std::unique_ptr<Expr> right"
+        "Unary    : Token loxperator, std::unique_ptr<Expr> right",
+        "Ternary  : std::unique_ptr<Expr> left, Token op1, std::unique_ptr<Expr> middle, Token op2, std::unique_ptr<Expr> right"
     });
     
     return 0;

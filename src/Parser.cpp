@@ -14,11 +14,11 @@ std::unique_ptr<lox::Expr> Parser::expression() {
 }
 
 std::unique_ptr<Expr> Parser::comma() {
-    std::unique_ptr<Expr> expr = equality();
+    std::unique_ptr<Expr> expr = ternary();
 
     while (match({TokenType::COMMA})) {
         Token op = previous();
-        std::unique_ptr<lox::Expr> right = equality();
+        std::unique_ptr<lox::Expr> right = ternary();
         expr = std::make_unique<lox::Expr>(
             Binary(std::move(expr), op, std::move(right))
         );
@@ -27,9 +27,23 @@ std::unique_ptr<Expr> Parser::comma() {
     return expr;
 }
 
-std::unique_ptr<lox::Expr> Parser::equality() {
-    
+std::unique_ptr<Expr> Parser::ternary() {
+    std::unique_ptr<Expr> expr = equality();
 
+    if (match({TokenType::Q_MARK})) {
+        Token op1 = previous();
+        std::unique_ptr<Expr> middle = expression();
+        Token op2 = consume(TokenType::COLON, "Expect ':' after expression");
+        std::unique_ptr<Expr> right = ternary();
+        expr = std::make_unique<Expr>(
+            Ternary(std::move(expr), op1, std::move(middle), op2, std::move(right))
+        );
+    }
+
+    return expr;
+}
+
+std::unique_ptr<lox::Expr> Parser::equality() {
     std::unique_ptr<lox::Expr> expr = comparison();
 
     while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {

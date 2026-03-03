@@ -6,7 +6,6 @@
 #include <sstream>
 #include "Expr.h" 
 
-
 struct AstPrinter {
     // 1. Entry Point
     std::string print(const lox::Expr& expr) {
@@ -36,15 +35,24 @@ struct AstPrinter {
         return parenthesize(expr.loxperator.lexeme, *expr.right);
     }
 
+    // --- NEW: Ternary Overload ---
+    std::string operator()(const lox::Ternary& expr) const {
+        // We combine the two operator lexemes (usually "?" and ":") to make "?:"
+        std::string opName = expr.op1.lexeme + expr.op2.lexeme; 
+        
+        // Pass all three child expressions to the variadic helper!
+        return parenthesize(opName, *expr.left, *expr.middle, *expr.right);
+    }
+
 private:
     // Helper to handle the recursion
     template <typename... Exprs>
     std::string parenthesize(std::string_view name, const Exprs&... parts) const {
         std::stringstream ss;
         ss << "(" << name;
+        // This fold expression cleanly expands no matter how many 'parts' we pass
         ((ss << " " << std::visit(*this, parts.value)), ...);
         ss << ")";
         return ss.str();
     }
 };
- 

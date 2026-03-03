@@ -8,6 +8,7 @@ enum class TokenType : std::uint8_t {
   // Single-character tokens.
   LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
   COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+  Q_MARK, COLON,
 
   // One or two character tokens.
   BANG, BANG_EQUAL,
@@ -43,6 +44,8 @@ constexpr std::string_view tokenTypeToString(TokenType type) {
         case SEMICOLON:     return "SEMICOLON";
         case SLASH:         return "SLASH";
         case STAR:          return "STAR";
+        case Q_MARK:        return "Q_MARK";
+        case COLON:         return "COLON";
         case BANG:          return "BANG";
         case BANG_EQUAL:    return "BANG_EQUAL";
         case EQUAL:         return "EQUAL";
