@@ -3,11 +3,14 @@
 #include <vector>
 #include <iostream>
 #include <string_view>
+#include <stdexcept>
 
 #include "Files.h"
 #include "Scanner.h"
 #include "Token.h"
 #include "Parser.h"
+#include "RuntimeError.h"
+#include "Interpreter.h"
 
 class Lox {
 public:
@@ -17,9 +20,11 @@ public:
 
     static void error (int line, std::string message);
     static void error (const Token& token, const std::string& message);
+    static void runtimeError(const RuntimeError& error);
 private:
     void run(std::string_view source);
 
     static bool hadError;
+    static bool hadRuntimeError;
     static void report(int line, std::string where, std::string message);
 };

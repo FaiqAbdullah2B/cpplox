@@ -3,6 +3,7 @@
 #include "Expr.h"
 
 bool Lox::hadError = false;
+bool Lox::hadRuntimeError = false;
 
 void Lox::runFile(std::string path) {
     Files handler;
@@ -15,6 +16,8 @@ void Lox::runFile(std::string path) {
 
     if (hadError)
         throw std::runtime_error("Error found in File");
+    if (hadRuntimeError)
+        throw std::runtime_error("Runtime error");
 }
 
 void Lox::runPrompt() {
@@ -42,10 +45,9 @@ void Lox::run(std::string_view source) {
     std::unique_ptr<lox::Expr> expression = parser.parse();
 
     if (hadError) return;
-    if (expression != nullptr) {
-        AstPrinter printer;
-        std::cout << printer.print(*expression) << "\n";
-    }
+
+    Interpreter interpreter;
+    interpreter.interpret(*expression);
 }
 
 void Lox::error (int line, std::string message){
@@ -63,4 +65,9 @@ void Lox::error(const Token& token, const std::string& message) {
     } else {
         report(token.line, " at '" + token.lexeme + "'", message);
     }
+}
+
+void Lox::runtimeError(const RuntimeError& error) {
+    std::cerr << error.what() << "\n[line " << error.token.line << "]" << std::endl;
+    hadRuntimeError = true;
 }
