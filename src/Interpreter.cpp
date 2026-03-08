@@ -53,14 +53,19 @@ LiteralType Interpreter::operator()(const lox::Binary& binary) {
             std::holds_alternative<double>(right)) {
                 return std::get<double>(left) + std::get<double>(right);
             }
-            if (std::holds_alternative<std::string>(left) &&
-            std::holds_alternative<std::string>(right)) {
-                return std::get<std::string>(left) + std::get<std::string>(right);
+
+            if (std::holds_alternative<std::string>(left) || 
+                std::holds_alternative<std::string>(right)) {
+                return stringifyLiteral(left) + stringifyLiteral(right);
             }
+        
             throw RuntimeError(binary.loxperator, "Operands must be both numbers or both strings.");
             break;
         case TokenType::SLASH:
             checkNumberOperands(binary.loxperator, left, right);
+            if (std::get<double>(right) == 0.0) {
+                throw RuntimeError(binary.loxperator, "Division by zero error.");
+            }
             return std::get<double>(left) / std::get<double>(right);
         case TokenType::STAR:
             checkNumberOperands(binary.loxperator, left, right);
