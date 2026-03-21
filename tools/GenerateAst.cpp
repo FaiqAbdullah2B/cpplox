@@ -39,6 +39,10 @@ void defineAst(
     writer << "#include <variant>\n";
     writer << "#include \"Token.h\"\n\n"; // <--- This brings in your global LiteralType
 
+    if (baseName == "Stmt") {
+        writer << "#include \"Expr.h\"\n\n";
+    }
+
     writer << "namespace lox {\n\n";
 
     // 1. Forward Declarations
@@ -158,6 +162,11 @@ int main (int argc, char* argv[]){
         "Literal  : LiteralType value",
         "Unary    : Token loxperator, std::unique_ptr<Expr> right",
         "Ternary  : std::unique_ptr<Expr> left, Token op1, std::unique_ptr<Expr> middle, Token op2, std::unique_ptr<Expr> right"
+    });
+
+    defineAst(outputDir, "Stmt", {
+        "Expression : std::unique_ptr<Expr> expression",
+        "Print      : std::unique_ptr<Expr> expression"
     });
     
     return 0;
