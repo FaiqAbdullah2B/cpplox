@@ -11,6 +11,7 @@
 #include "Parser.h"
 #include "RuntimeError.h"
 #include "Interpreter.h"
+#include "Stmt.h"
 
 class Lox {
 public:

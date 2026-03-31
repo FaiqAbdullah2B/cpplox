@@ -1,9 +1,10 @@
 #include "Interpreter.h"
 
-void Interpreter::interpret(const lox::Expr& expression) {
+void Interpreter::interpret(const std::vector<std::unique_ptr<lox::Stmt>>& statements) {
     try {
-        LiteralType value = evaluate(expression);
-        std::cout << stringifyLiteral(value) << std::endl;
+        for (const auto& stmt : statements) {
+            evaluate(*stmt);
+        }
     } catch (const RuntimeError& error) {      
         Lox::runtimeError(error); 
     }
@@ -11,6 +12,20 @@ void Interpreter::interpret(const lox::Expr& expression) {
 
 LiteralType Interpreter::evaluate(const lox::Expr& expr) {
     return std::visit(*this, expr.value);
+}
+
+LiteralType Interpreter::evaluate(const lox::Stmt& stmt) {
+    return std::visit(*this, stmt.value);
+}
+
+LiteralType Interpreter::operator()(const lox::Expression& expression) {
+    return evaluate(*expression.expression);
+}
+
+LiteralType Interpreter::operator()(const lox::Print& print) {
+    LiteralType value = evaluate(*print.expression);
+    std::cout << stringifyLiteral(value) << std::endl;
+    return std::monostate{};
 }
 
 LiteralType Interpreter::operator()(const lox::Literal& literal) {

@@ -1,12 +1,37 @@
 #include "Parser.h"
 using namespace lox;
 
-std::unique_ptr<Expr> Parser::parse() {
-    try {
-        return expression();
-    } catch (const ParseError& error) {
-        return nullptr;
+std::vector<std::unique_ptr<Stmt>> Parser::parse() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+    while (!isAtEnd()) {
+        statements.push_back(statement());
     }
+
+    return statements;
+}
+
+std::unique_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::PRINT}))
+        return printStatement();
+    
+    return expressionStatement();
+
+}
+
+std::unique_ptr<Stmt> Parser::printStatement() {
+    std::unique_ptr<Expr> value = expression();
+    consume(TokenType::SEMICOLON, "Expect ; after value.");
+    return std::make_unique<Stmt>(
+        Print(std::move(value))
+    );
+}
+
+std::unique_ptr<Stmt> Parser::expressionStatement() {
+    std::unique_ptr<Expr> value = expression();
+    consume(TokenType::SEMICOLON, "Expect ; after expression.");
+    return std::make_unique<Stmt>(
+        Expression(std::move(value))
+    );
 }
 
 std::unique_ptr<lox::Expr> Parser::expression() {

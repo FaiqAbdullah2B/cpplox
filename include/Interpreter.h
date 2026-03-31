@@ -1,16 +1,22 @@
 #pragma once
 #include <variant>
+#include <vector>
 
 #include "Token.h"
 #include "Expr.h"
 #include "RuntimeError.h"
 #include "Lox.h"
+#include "Stmt.h"
 
 class Interpreter {
 public:
-    void interpret(const lox::Expr& expression);
+    void interpret(const std::vector<std::unique_ptr<lox::Stmt>>& statements);
 
     LiteralType evaluate(const lox::Expr& expr);
+    LiteralType evaluate(const lox::Stmt& stmt);
+
+    LiteralType operator()(const lox::Expression& expression);
+    LiteralType operator()(const lox::Print& print);
 
     LiteralType operator()(const lox::Literal& literal);
     LiteralType operator()(const lox::Grouping& grouping);

@@ -7,11 +7,12 @@
 #include "TokenType.h"
 #include "Expr.h"
 #include "Lox.h"
+#include "Stmt.h"
 
 class Parser {
 public:
     explicit Parser(const std::vector<Token>& tokens) : tokens(std::move(tokens)) {}
-    std::unique_ptr<lox::Expr> parse();
+    std::vector<std::unique_ptr<lox::Stmt>> parse();
 private:
     class ParseError : public std::runtime_error {
     public:
@@ -20,6 +21,10 @@ private:
     
     const std::vector<Token>& tokens;
     size_t current = 0;
+
+    std::unique_ptr<lox::Stmt> statement();
+    std::unique_ptr<lox::Stmt> printStatement();
+    std::unique_ptr<lox::Stmt> expressionStatement();
 
     std::unique_ptr<lox::Expr> expression();
     std::unique_ptr<lox::Expr> comma();
