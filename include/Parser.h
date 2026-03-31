@@ -22,11 +22,14 @@ private:
     const std::vector<Token>& tokens;
     size_t current = 0;
 
+    std::unique_ptr<lox::Stmt> declaration();
+    std::unique_ptr<lox::Stmt> varDeclaration();
     std::unique_ptr<lox::Stmt> statement();
     std::unique_ptr<lox::Stmt> printStatement();
     std::unique_ptr<lox::Stmt> expressionStatement();
 
     std::unique_ptr<lox::Expr> expression();
+    std::unique_ptr<lox::Expr> assignment();
     std::unique_ptr<lox::Expr> comma();
     std::unique_ptr<lox::Expr> ternary();
     std::unique_ptr<lox::Expr> equality();

@@ -4,10 +4,36 @@ using namespace lox;
 std::vector<std::unique_ptr<Stmt>> Parser::parse() {
     std::vector<std::unique_ptr<Stmt>> statements;
     while (!isAtEnd()) {
-        statements.push_back(statement());
+        statements.push_back(declaration());
     }
 
     return statements;
+}
+
+std::unique_ptr<Stmt> Parser::declaration() {
+    try {
+        if (match({TokenType::VAR})) {
+            return varDeclaration();
+        }
+        return statement();
+    } catch (const ParseError& error) {
+        synchronize();
+        return nullptr;
+    }
+}
+
+std::unique_ptr<Stmt> Parser::varDeclaration() {
+    Token name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+
+    std::unique_ptr<Expr> initializer = nullptr;
+    if (match({TokenType::EQUAL})) {
+        initializer = expression();
+    }
+
+    consume(TokenType::SEMICOLON, "Expect ';' after variable declaration.");
+    return std::make_unique<Stmt>(
+        Var(name, std::move(initializer))
+    );
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
@@ -35,7 +61,7 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
 }
 
 std::unique_ptr<lox::Expr> Parser::expression() {
-    return comma();
+    return assignment();
 }
 
 std::unique_ptr<Expr> Parser::comma() {
@@ -165,6 +191,12 @@ std::unique_ptr<lox::Expr> Parser::primary() {
         consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
         return std::make_unique<lox::Expr>(
             Grouping(std::move(expr))
+        );
+    }
+
+    if (match({TokenType::IDENTIFIER})) {
+        return std::make_unique<lox::Expr>(
+            Variable(previous())
         );
     }
 

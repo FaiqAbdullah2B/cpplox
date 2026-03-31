@@ -23,6 +23,8 @@ public:
     static void error (const Token& token, const std::string& message);
     static void runtimeError(const RuntimeError& error);
 private:
+    Interpreter interpreter;
+    
     void run(std::string_view source);
 
     static bool hadError;

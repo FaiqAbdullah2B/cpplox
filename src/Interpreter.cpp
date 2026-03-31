@@ -1,4 +1,5 @@
 #include "Interpreter.h"
+#include "Lox.h"
 
 void Interpreter::interpret(const std::vector<std::unique_ptr<lox::Stmt>>& statements) {
     try {
@@ -25,6 +26,15 @@ LiteralType Interpreter::operator()(const lox::Expression& expression) {
 LiteralType Interpreter::operator()(const lox::Print& print) {
     LiteralType value = evaluate(*print.expression);
     std::cout << stringifyLiteral(value) << std::endl;
+    return std::monostate{};
+}
+
+LiteralType Interpreter::operator()(const lox::Var& variable) {
+    LiteralType value = std::monostate{};
+    if (variable.initializer) {
+        value = evaluate(*variable.initializer);
+    }
+    environment->define(variable.name.lexeme, value);
     return std::monostate{};
 }
 
@@ -121,6 +131,10 @@ LiteralType Interpreter::operator()(const lox::Ternary& ternary) {
     } else {
         return evaluate(*ternary.right);
     }
+}
+
+LiteralType Interpreter::operator()(const lox::Variable& variable) {
+    return environment->get(variable.name);
 }
 
 bool Interpreter::isTruthy(const LiteralType& val) {

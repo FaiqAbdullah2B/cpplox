@@ -41,6 +41,7 @@ set(SOURCES
     src/Scanner.cpp
     src/Parser.cpp
     src/Interpreter.cpp
+    src/Environment.cpp
 )
 
 # We include generated headers in the source list to trigger the custom command

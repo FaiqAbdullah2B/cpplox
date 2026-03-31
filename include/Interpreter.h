@@ -5,8 +5,8 @@
 #include "Token.h"
 #include "Expr.h"
 #include "RuntimeError.h"
-#include "Lox.h"
 #include "Stmt.h"
+#include "Environment.h"
 
 class Interpreter {
 public:
@@ -17,12 +17,14 @@ public:
 
     LiteralType operator()(const lox::Expression& expression);
     LiteralType operator()(const lox::Print& print);
+    LiteralType operator()(const lox::Var& variable);
 
     LiteralType operator()(const lox::Literal& literal);
     LiteralType operator()(const lox::Grouping& grouping);
     LiteralType operator()(const lox::Unary& unary);
     LiteralType operator()(const lox::Binary& binary);
     LiteralType operator()(const lox::Ternary& ternary);
+    LiteralType operator()(const lox::Variable& variable);
 
 private:
     // Helper methods
@@ -31,4 +33,6 @@ private:
 
     void checkNumberOperand(const Token& loxperator, const LiteralType& operand);
     void checkNumberOperands(const Token& loxperator, const LiteralType& left, const LiteralType& right);
+
+    std::shared_ptr<Environment> environment = std::make_shared<Environment>();
 };
