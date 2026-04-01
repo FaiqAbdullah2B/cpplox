@@ -40,8 +40,24 @@ std::unique_ptr<Stmt> Parser::statement() {
     if (match({TokenType::PRINT}))
         return printStatement();
     
+    if (match({TokenType::LEFT_BRACE})) {
+        return std::make_unique<Stmt>(
+            Block(block())
+        );
+    }
     return expressionStatement();
 
+}
+
+std::vector<std::unique_ptr<Stmt>> Parser::block() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        statements.push_back(declaration());
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
 }
 
 std::unique_ptr<Stmt> Parser::printStatement() {
@@ -61,18 +77,38 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
 }
 
 std::unique_ptr<lox::Expr> Parser::expression() {
-    return assignment();
+    return comma();
 }
 
 std::unique_ptr<Expr> Parser::comma() {
-    std::unique_ptr<Expr> expr = ternary();
+    std::unique_ptr<Expr> expr = assignment();
 
     while (match({TokenType::COMMA})) {
         Token op = previous();
-        std::unique_ptr<lox::Expr> right = ternary();
+        std::unique_ptr<lox::Expr> right = assignment();
         expr = std::make_unique<lox::Expr>(
             Binary(std::move(expr), op, std::move(right))
         );
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::assignment() {
+    std::unique_ptr<Expr> expr = ternary();
+
+    if (match({TokenType::EQUAL})) {
+        Token equals = previous();
+        std::unique_ptr<Expr> value = assignment();
+
+        if (std::holds_alternative<Variable>(expr->value)) {
+            Token name = std::get<Variable>(expr->value).name;
+            return std::make_unique<lox::Expr>(
+                Assign(name, std::move(value))
+            );
+        }
+
+        error(equals, "Invalid assignment target.");
     }
 
     return expr;

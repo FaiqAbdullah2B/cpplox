@@ -157,7 +157,7 @@ int main (int argc, char* argv[]){
     std::string outputDir = argv[1];
 
     defineAst(outputDir, "Expr", {
-        "Assign   : Token name, Expr value",
+        "Assign   : Token name, std::unique_ptr<Expr> value",
         "Binary   : std::unique_ptr<Expr> left, Token loxperator, std::unique_ptr<Expr> right",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal  : LiteralType value",
@@ -167,6 +167,7 @@ int main (int argc, char* argv[]){
     });
 
     defineAst(outputDir, "Stmt", {
+        "Block      : std::vector<std::unique_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
         "Print      : std::unique_ptr<Expr> expression",
         "Var        : Token name, std::unique_ptr<Expr> initializer"

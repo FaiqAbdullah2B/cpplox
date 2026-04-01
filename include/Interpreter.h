@@ -15,10 +15,12 @@ public:
     LiteralType evaluate(const lox::Expr& expr);
     LiteralType evaluate(const lox::Stmt& stmt);
 
+    LiteralType operator()(const lox::Block& block);
     LiteralType operator()(const lox::Expression& expression);
     LiteralType operator()(const lox::Print& print);
     LiteralType operator()(const lox::Var& variable);
 
+    LiteralType operator()(const lox::Assign& assign);
     LiteralType operator()(const lox::Literal& literal);
     LiteralType operator()(const lox::Grouping& grouping);
     LiteralType operator()(const lox::Unary& unary);

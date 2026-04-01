@@ -19,6 +19,19 @@ LiteralType Interpreter::evaluate(const lox::Stmt& stmt) {
     return std::visit(*this, stmt.value);
 }
 
+LiteralType Interpreter::operator()(const lox::Block& block) {
+    std::shared_ptr<Environment> previous = environment;
+    environment = std::make_shared<Environment>(previous);
+
+    LiteralType result = std::monostate{};
+    for (const auto& stmt : block.statements) {
+        result = evaluate(*stmt);
+    }
+
+    environment = previous;
+    return result;
+}
+
 LiteralType Interpreter::operator()(const lox::Expression& expression) {
     return evaluate(*expression.expression);
 }
@@ -36,6 +49,12 @@ LiteralType Interpreter::operator()(const lox::Var& variable) {
     }
     environment->define(variable.name.lexeme, value);
     return std::monostate{};
+}
+
+LiteralType Interpreter::operator()(const lox::Assign& assign) {
+    LiteralType value = evaluate(*assign.value);
+    environment->assign(assign.name, value);
+    return value;
 }
 
 LiteralType Interpreter::operator()(const lox::Literal& literal) {

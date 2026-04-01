@@ -22,6 +22,7 @@ private:
     const std::vector<Token>& tokens;
     size_t current = 0;
 
+    std::vector<std::unique_ptr<lox::Stmt>> block();
     std::unique_ptr<lox::Stmt> declaration();
     std::unique_ptr<lox::Stmt> varDeclaration();
     std::unique_ptr<lox::Stmt> statement();

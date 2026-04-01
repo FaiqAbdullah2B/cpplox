@@ -49,6 +49,12 @@ struct AstPrinter {
         return expr.name.lexeme;
     }
 
+    std::string operator()(const lox::Assign& expr) const {
+    // We include the variable name in the "name" field of the parenthesize call
+    // format: (= <name> <value>)
+    return parenthesize("= " + expr.name.lexeme, *expr.value);
+    }
+
 private:
     // Helper to handle the recursion
     template <typename... Exprs>
