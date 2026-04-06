@@ -43,6 +43,8 @@ std::unique_ptr<Stmt> Parser::statement() {
         return printStatement();
     if (match({TokenType::WHILE}))
         return whileStatement();
+    if (match({TokenType::FOR}))
+        return forStatement();
     
     if (match({TokenType::LEFT_BRACE})) {
         return std::make_unique<Stmt>(
@@ -134,14 +136,15 @@ std::unique_ptr<Stmt> Parser::forStatement() {
     std::unique_ptr<Stmt> body = statement();
 
     // Desugar the for loop into a while loop
-    if (increment) {
+    if (increment != nullptr) {
+        std::vector<std::unique_ptr<Stmt>> bodyStmts;
+        bodyStmts.push_back(std::move(body));
+        bodyStmts.push_back(std::make_unique<Stmt>(
+            Expression(std::move(increment))
+        ));
+
         body = std::make_unique<Stmt>(
-            Block(std::vector<std::unique_ptr<Stmt>>{
-                std::move(body),
-                std::make_unique<Stmt>(
-                    Expression(std::move(increment))
-                )
-            })
+            Block(std::move(bodyStmts))
         );
     }
 
@@ -155,12 +158,12 @@ std::unique_ptr<Stmt> Parser::forStatement() {
         While(std::move(condition), std::move(body))
     );
 
-    if (initializer) {
+    if (initializer != nullptr) {
+        std::vector<std::unique_ptr<Stmt>> initStmts;
+        initStmts.push_back(std::move(initializer));
+        initStmts.push_back(std::move(body));
         body = std::make_unique<Stmt>(
-            Block(std::vector<std::unique_ptr<Stmt>>{
-                std::move(initializer),
-                std::move(body)
-            })
+            Block(std::move(initStmts))
         );
     }
 
