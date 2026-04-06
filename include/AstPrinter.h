@@ -55,6 +55,11 @@ struct AstPrinter {
     return parenthesize("= " + expr.name.lexeme, *expr.value);
     }
 
+    // Add this right next to your Binary visitor
+    std::string operator()(const lox::Logical& expr) const {
+        return parenthesize(expr.loxperator.lexeme, *expr.left, *expr.right);
+    }
+
 private:
     // Helper to handle the recursion
     template <typename... Exprs>

@@ -37,8 +37,12 @@ std::unique_ptr<Stmt> Parser::varDeclaration() {
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
+    if (match({TokenType::IF}))
+        return ifStatement();
     if (match({TokenType::PRINT}))
         return printStatement();
+    if (match({TokenType::WHILE}))
+        return whileStatement();
     
     if (match({TokenType::LEFT_BRACE})) {
         return std::make_unique<Stmt>(
@@ -47,6 +51,22 @@ std::unique_ptr<Stmt> Parser::statement() {
     }
     return expressionStatement();
 
+}
+
+std::unique_ptr<Stmt> Parser::ifStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+    std::unique_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+    std::unique_ptr<Stmt> thenBranch = statement();
+    std::unique_ptr<Stmt> elseBranch = nullptr;
+    if (match({TokenType::ELSE})) {
+        elseBranch = statement();
+    }
+
+    return std::make_unique<Stmt>(
+        If(std::move(condition), std::move(thenBranch), std::move(elseBranch))
+    );
 }
 
 std::vector<std::unique_ptr<Stmt>> Parser::block() {
@@ -74,6 +94,77 @@ std::unique_ptr<Stmt> Parser::expressionStatement() {
     return std::make_unique<Stmt>(
         Expression(std::move(value))
     );
+}
+
+std::unique_ptr<Stmt> Parser::whileStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+    std::unique_ptr<Expr> condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+    std::unique_ptr<Stmt> body = statement();
+
+    return std::make_unique<Stmt>(
+        While(std::move(condition), std::move(body))
+    );
+}
+
+std::unique_ptr<Stmt> Parser::forStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
+
+    std::unique_ptr<Stmt> initializer;
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+
+    std::unique_ptr<Expr> condition = nullptr;
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    std::unique_ptr<Expr> increment = nullptr;
+    if (!check(TokenType::RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    std::unique_ptr<Stmt> body = statement();
+
+    // Desugar the for loop into a while loop
+    if (increment) {
+        body = std::make_unique<Stmt>(
+            Block(std::vector<std::unique_ptr<Stmt>>{
+                std::move(body),
+                std::make_unique<Stmt>(
+                    Expression(std::move(increment))
+                )
+            })
+        );
+    }
+
+    if (!condition) {
+        condition = std::make_unique<Expr>(
+            Literal(true)
+        );
+    }
+    
+    body = std::make_unique<Stmt>(
+        While(std::move(condition), std::move(body))
+    );
+
+    if (initializer) {
+        body = std::make_unique<Stmt>(
+            Block(std::vector<std::unique_ptr<Stmt>>{
+                std::move(initializer),
+                std::move(body)
+            })
+        );
+    }
+
+    return body;
 }
 
 std::unique_ptr<lox::Expr> Parser::expression() {
@@ -115,7 +206,7 @@ std::unique_ptr<Expr> Parser::assignment() {
 }
 
 std::unique_ptr<Expr> Parser::ternary() {
-    std::unique_ptr<Expr> expr = equality();
+    std::unique_ptr<Expr> expr = logical_or();
 
     if (match({TokenType::Q_MARK})) {
         Token op1 = previous();
@@ -124,6 +215,34 @@ std::unique_ptr<Expr> Parser::ternary() {
         std::unique_ptr<Expr> right = ternary();
         expr = std::make_unique<Expr>(
             Ternary(std::move(expr), op1, std::move(middle), op2, std::move(right))
+        );
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logical_or() {
+    std::unique_ptr<Expr> expr = logical_and();
+
+    while (match({TokenType::OR})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = logical_and();
+        expr = std::make_unique<Expr>(
+            Logical(std::move(expr), op, std::move(right))
+        );
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logical_and() {
+    std::unique_ptr<Expr> expr = equality();
+
+    while (match({TokenType::AND})) {
+        Token op = previous();
+        std::unique_ptr<Expr> right = equality();
+        expr = std::make_unique<Expr>(
+            Logical(std::move(expr), op, std::move(right))
         );
     }
 

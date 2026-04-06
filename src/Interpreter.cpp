@@ -4,7 +4,7 @@
 void Interpreter::interpret(const std::vector<std::unique_ptr<lox::Stmt>>& statements) {
     try {
         for (const auto& stmt : statements) {
-            evaluate(*stmt);
+            execute(*stmt);
         }
     } catch (const RuntimeError& error) {      
         Lox::runtimeError(error); 
@@ -15,25 +15,39 @@ LiteralType Interpreter::evaluate(const lox::Expr& expr) {
     return std::visit(*this, expr.value);
 }
 
-LiteralType Interpreter::evaluate(const lox::Stmt& stmt) {
+LiteralType Interpreter::execute(const lox::Stmt& stmt) {
     return std::visit(*this, stmt.value);
 }
 
 LiteralType Interpreter::operator()(const lox::Block& block) {
     std::shared_ptr<Environment> previous = environment;
-    environment = std::make_shared<Environment>(previous);
-
-    LiteralType result = std::monostate{};
-    for (const auto& stmt : block.statements) {
-        result = evaluate(*stmt);
+    try {
+        environment = std::make_shared<Environment>(previous);
+        for (const auto& stmt : block.statements) {
+            execute(*stmt);
+        }
+        environment = previous;
+    } catch (...) {
+        environment = previous; // Restore even on error!
+        throw; // Re-throw so interpret() can catch it
     }
-
-    environment = previous;
-    return result;
+    return std::monostate{};
 }
 
 LiteralType Interpreter::operator()(const lox::Expression& expression) {
     return evaluate(*expression.expression);
+}
+
+LiteralType Interpreter::operator()(const lox::If& ifStmt) {
+    LiteralType condition = evaluate(*ifStmt.condition);
+
+    if (isTruthy(condition)) {
+        return execute(*ifStmt.thenBranch);
+    } else if (ifStmt.elseBranch) {
+        return execute(*ifStmt.elseBranch);
+    }
+
+    return std::monostate{};
 }
 
 LiteralType Interpreter::operator()(const lox::Print& print) {
@@ -51,6 +65,13 @@ LiteralType Interpreter::operator()(const lox::Var& variable) {
     return std::monostate{};
 }
 
+LiteralType Interpreter::operator()(const lox::While& whileStmt) {
+    while (isTruthy(evaluate(*whileStmt.condition))) {
+        execute(*whileStmt.body);
+    }
+    return std::monostate{};
+}
+
 LiteralType Interpreter::operator()(const lox::Assign& assign) {
     LiteralType value = evaluate(*assign.value);
     environment->assign(assign.name, value);
@@ -60,6 +81,19 @@ LiteralType Interpreter::operator()(const lox::Assign& assign) {
 LiteralType Interpreter::operator()(const lox::Literal& literal) {
     return literal.value;
 }
+
+LiteralType Interpreter::operator()(const lox::Logical& logical) {
+    LiteralType left = evaluate(*logical.left);
+
+    if (logical.loxperator.type == TokenType::OR) {
+        if (isTruthy(left)) return left;
+    } else {
+        if (!isTruthy(left)) return left;
+    }
+
+    return evaluate(*logical.right);
+}
+
 
 LiteralType Interpreter::operator()(const lox::Grouping& grouping) {
     return evaluate(*grouping.expression);

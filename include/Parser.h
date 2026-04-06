@@ -24,15 +24,20 @@ private:
 
     std::vector<std::unique_ptr<lox::Stmt>> block();
     std::unique_ptr<lox::Stmt> declaration();
+    std::unique_ptr<lox::Stmt> forStatement();
     std::unique_ptr<lox::Stmt> varDeclaration();
     std::unique_ptr<lox::Stmt> statement();
+    std::unique_ptr<lox::Stmt> ifStatement();
     std::unique_ptr<lox::Stmt> printStatement();
     std::unique_ptr<lox::Stmt> expressionStatement();
+    std::unique_ptr<lox::Stmt> whileStatement();
 
     std::unique_ptr<lox::Expr> expression();
     std::unique_ptr<lox::Expr> assignment();
     std::unique_ptr<lox::Expr> comma();
     std::unique_ptr<lox::Expr> ternary();
+    std::unique_ptr<lox::Expr> logical_or();
+    std::unique_ptr<lox::Expr> logical_and();
     std::unique_ptr<lox::Expr> equality();
     std::unique_ptr<lox::Expr> comparison();
     std::unique_ptr<lox::Expr> term();
