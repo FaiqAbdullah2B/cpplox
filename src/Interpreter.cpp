@@ -1,6 +1,8 @@
 #include "Interpreter.h"
 #include "Lox.h"
 
+namespace lox {
+
 void Interpreter::interpret(const std::vector<std::unique_ptr<lox::Stmt>>& statements) {
     try {
         for (const auto& stmt : statements) {
@@ -19,23 +21,51 @@ LiteralType Interpreter::execute(const lox::Stmt& stmt) {
     return std::visit(*this, stmt.value);
 }
 
-LiteralType Interpreter::operator()(const lox::Block& block) {
-    std::shared_ptr<Environment> previous = environment;
+// LiteralType Interpreter::operator()(const lox::Block& block) {
+//     std::shared_ptr<Environment> previous = environment;
+//     try {
+//         environment = std::make_shared<Environment>(previous);
+//         for (const auto& stmt : block.statements) {
+//             execute(*stmt);
+//         }
+//         environment = previous;
+//     } catch (...) {
+//         environment = previous; // Restore even on error!
+//         throw; // Re-throw so interpret() can catch it
+//     }
+//     return std::monostate{};
+// }
+
+// The new helper method
+void Interpreter::executeBlock(const std::vector<std::unique_ptr<Stmt>>& statements, 
+                               std::shared_ptr<Environment> env) {
+    std::shared_ptr<Environment> previous = this->environment;
     try {
-        environment = std::make_shared<Environment>(previous);
-        for (const auto& stmt : block.statements) {
+        this->environment = env;
+        for (const auto& stmt : statements) {
             execute(*stmt);
         }
-        environment = previous;
+        this->environment = previous;
     } catch (...) {
-        environment = previous; // Restore even on error!
-        throw; // Re-throw so interpret() can catch it
+        this->environment = previous;
+        throw;
     }
+}
+
+// Your existing visitor now looks like this:
+LiteralType Interpreter::operator()(const lox::Block& block) {
+    executeBlock(block.statements, std::make_shared<Environment>(environment));
     return std::monostate{};
 }
 
 LiteralType Interpreter::operator()(const lox::Expression& expression) {
     return evaluate(*expression.expression);
+}
+
+LiteralType Interpreter::operator()(const lox::Function& function) {
+    auto loxFunction = std::make_shared<lox::LoxFunction>(&function);
+    environment->define(function.name.lexeme, loxFunction);
+    return std::monostate{};
 }
 
 LiteralType Interpreter::operator()(const lox::If& ifStmt) {
@@ -54,6 +84,18 @@ LiteralType Interpreter::operator()(const lox::Print& print) {
     LiteralType value = evaluate(*print.expression);
     std::cout << stringifyLiteral(value) << std::endl;
     return std::monostate{};
+}
+
+LiteralType Interpreter::operator()(const lox::Return& returnStmt) {
+    LiteralType value = std::monostate{}; // Default to nil
+
+    // If there is a value attached to the return, evaluate it
+    if (returnStmt.value != nullptr) {
+        value = evaluate(*returnStmt.value);
+    }
+
+    // Throw the exception to instantly break out of the function body
+    throw ReturnException(std::move(value));
 }
 
 LiteralType Interpreter::operator()(const lox::Var& variable) {
@@ -114,6 +156,28 @@ LiteralType Interpreter::operator()(const lox::Unary& unary) {
 
     // Unreachable
     return std::monostate{};
+}
+
+LiteralType Interpreter::operator()(const lox::Call& call) {
+    LiteralType callee = evaluate(*call.callee);
+
+    std::vector<LiteralType> arguments{};
+    for (const auto &arg : call.arguments) {
+        arguments.push_back(evaluate(*arg));
+    }
+
+    if (!std::holds_alternative<std::shared_ptr<lox::LoxCallable>>(callee)) {
+        throw RuntimeError(call.paren, "Can only call function and classes.");
+    }
+
+    auto function = std::get<std::shared_ptr<lox::LoxCallable>>(callee);
+
+    if (arguments.size() != static_cast<size_t>(function->arity())) {
+        throw RuntimeError(call.paren, "Expected " + std::to_string(function->arity()) + 
+                           " arguments but got " + std::to_string(arguments.size()) + ".");
+    }
+
+    return function->call(*this, std::move(arguments));
 }
 
 // Stubs to keep std::visit happy until you write the logic
@@ -208,4 +272,6 @@ void Interpreter::checkNumberOperand(const Token& loxperator, const LiteralType&
 void Interpreter::checkNumberOperands(const Token& loxperator, const LiteralType& left, const LiteralType& right) {
     if (std::holds_alternative<double>(left) && std::holds_alternative<double>(right)) return;
     throw RuntimeError(loxperator, "Operands must be numbers.");
+}
+
 }

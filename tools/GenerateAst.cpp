@@ -159,6 +159,7 @@ int main (int argc, char* argv[]){
     defineAst(outputDir, "Expr", {
         "Assign   : Token name, std::unique_ptr<Expr> value",
         "Binary   : std::unique_ptr<Expr> left, Token loxperator, std::unique_ptr<Expr> right",
+        "Call     : std::unique_ptr<Expr> callee, Token paren, std::vector<std::unique_ptr<Expr>> arguments",
         "Grouping : std::unique_ptr<Expr> expression",
         "Literal  : LiteralType value",
         "Logical  : std::unique_ptr<Expr> left, Token loxperator, std::unique_ptr<Expr> right",
@@ -170,8 +171,10 @@ int main (int argc, char* argv[]){
     defineAst(outputDir, "Stmt", {
         "Block      : std::vector<std::unique_ptr<Stmt>> statements",
         "Expression : std::unique_ptr<Expr> expression",
+        "Function   : Token name, std::vector<Token> params, std::vector<std::unique_ptr<Stmt>> body",
         "If         : std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> thenBranch, std::unique_ptr<Stmt> elseBranch",
         "Print      : std::unique_ptr<Expr> expression",
+        "Return     : Token keyword, std::unique_ptr<Expr> value",
         "Var        : Token name, std::unique_ptr<Expr> initializer",
         "While      : std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body"
     });

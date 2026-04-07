@@ -4,33 +4,16 @@
 #include <variant>
 #include <string>
 #include <iostream>
+#include <memory>
 #include <TokenType.h>
 
-using LiteralType = std::variant<std::monostate, double, std::string, bool>;
-
-inline std::string stringifyLiteral(const LiteralType& literal) {
-    return std::visit([](const auto &arg) -> std::string {
-        using T = std::decay_t<decltype(arg)>;
-
-        if constexpr (std::is_same_v<T, std::monostate>) {
-            return "nil";
-        } else if constexpr (std::is_same_v<T, std::string>) {
-            return arg;
-        } else if constexpr (std::is_same_v<T, bool>) {
-            return arg ? "true" : "false";
-        } else if constexpr (std::is_same_v<T, double>) {
-            // The Lox-compliant double formatter!
-            std::string text = std::to_string(arg);
-            text.erase(text.find_last_not_of('0') + 1, std::string::npos);
-            if (text.back() == '.') {
-                text.pop_back();
-            }
-            return text;
-        } else {
-            return "unknown";
-        }
-    }, literal);
+namespace lox {
+    class LoxCallable;
 }
+
+using LiteralType = std::variant<std::monostate, double, std::string, bool, std::shared_ptr<lox::LoxCallable>>;
+
+std::string stringifyLiteral(const LiteralType& literal);
 
 class Token {  
 public: 

@@ -2,6 +2,7 @@
 #include <vector>
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 
 #include "Token.h"
 #include "TokenType.h"
@@ -29,7 +30,9 @@ private:
     std::unique_ptr<lox::Stmt> statement();
     std::unique_ptr<lox::Stmt> ifStatement();
     std::unique_ptr<lox::Stmt> printStatement();
+    std::unique_ptr<lox::Stmt> returnStatement();
     std::unique_ptr<lox::Stmt> expressionStatement();
+    std::unique_ptr<lox::Stmt> function(const std::string& kind);
     std::unique_ptr<lox::Stmt> whileStatement();
 
     std::unique_ptr<lox::Expr> expression();
@@ -43,6 +46,8 @@ private:
     std::unique_ptr<lox::Expr> term();
     std::unique_ptr<lox::Expr> factor();
     std::unique_ptr<lox::Expr> unary();
+    std::unique_ptr<lox::Expr> finishCall(std::unique_ptr<lox::Expr> callee);
+    std::unique_ptr<lox::Expr> call();
     std::unique_ptr<lox::Expr> primary();
 
     bool match(std::initializer_list<TokenType> types);

@@ -42,6 +42,8 @@ set(SOURCES
     src/Parser.cpp
     src/Interpreter.cpp
     src/Environment.cpp
+    src/LoxFunction.cpp
+    src/Token.cpp
 )
 
 # We include generated headers in the source list to trigger the custom command
