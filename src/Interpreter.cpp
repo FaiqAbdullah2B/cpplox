@@ -63,8 +63,8 @@ LiteralType Interpreter::operator()(const lox::Expression& expression) {
 }
 
 LiteralType Interpreter::operator()(const lox::Function& function) {
-    auto loxFunction = std::make_shared<lox::LoxFunction>(&function);
-    environment->define(function.name.lexeme, loxFunction);
+    auto loxFunction = std::make_shared<lox::LoxFunction>(&function, this->environment);
+    this->environment->define(function.name.lexeme, loxFunction);
     return std::monostate{};
 }
 

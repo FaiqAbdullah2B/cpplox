@@ -3,8 +3,8 @@
 
 namespace lox {
 
-    LoxFunction::LoxFunction(const Function* declaration) 
-        : declaration(declaration) {}
+    LoxFunction::LoxFunction(const Function* declaration, const std::shared_ptr<Environment> closure) 
+        : declaration(declaration), closure(std::move(closure)) {}
 
     int LoxFunction::arity() {
         return declaration->params.size();
@@ -17,7 +17,7 @@ namespace lox {
     LiteralType LoxFunction::call(Interpreter& interpreter, std::vector<LiteralType> arguments) {
         // 1. Create a new environment. Right now, its parent is the globals.
         // (We will change this to 'closure' in Chapter 11, but globals is correct for now).
-        auto environment = std::make_shared<Environment>(interpreter.globals);
+        auto environment = std::make_shared<Environment>(closure);
 
         // 2. Bind the arguments to the parameter names
         for (size_t i = 0; i < declaration->params.size(); ++i) {
