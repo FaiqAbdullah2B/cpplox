@@ -32,7 +32,7 @@ This is not a copy-paste port. Every design decision was made consciously — ch
 
 ---
 
-## ✨ Language Features Supported
+## 🛠️ Language Features Supported
 
 Lox is a surprisingly complete little language. cpplox supports all of it:
 
