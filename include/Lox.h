@@ -12,6 +12,7 @@
 #include "RuntimeError.h"
 #include "Interpreter.h"
 #include "Stmt.h"
+#include "Resolver.h"
 
 class Lox {
 public:

@@ -45,7 +45,12 @@ void Lox::run(std::string_view source) {
     std::vector<std::unique_ptr<lox::Stmt>> statements = parser.parse();
 
     if (hadError) return;
-    
+
+    lox::Resolver resolver = lox::Resolver(interpreter);
+    resolver.resolve(statements);
+
+    if (hadError) return;
+
     interpreter.interpret(statements);
 }
 

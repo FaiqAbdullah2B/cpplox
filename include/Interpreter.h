@@ -4,6 +4,7 @@
 #include <chrono> 
 
 #include "Token.h"
+#include "unordered_map"
 #include "Expr.h"
 #include "RuntimeError.h"
 #include "Stmt.h"
@@ -15,6 +16,8 @@ namespace lox{
 
 class Interpreter {
 public:
+
+    const lox::Expr* currentExpr = nullptr;
 
     std::shared_ptr<Environment> globals = std::make_shared<Environment>();
     std::shared_ptr<Environment> environment = globals;
@@ -60,6 +63,11 @@ public:
     LiteralType operator()(const lox::Binary& binary);
     LiteralType operator()(const lox::Ternary& ternary);
     LiteralType operator()(const lox::Variable& variable);
+    
+    std::unordered_map<const lox::Expr*, int> locals;
+    void resolve(const lox::Expr* expr, int depth);
+
+    LiteralType lookUpVariable(const Token& name, const lox::Expr* expr);
 
 private:
     // Helper methods
@@ -68,6 +76,8 @@ private:
 
     void checkNumberOperand(const Token& loxperator, const LiteralType& operand);
     void checkNumberOperands(const Token& loxperator, const LiteralType& left, const LiteralType& right);
+
+    
 
 };
 

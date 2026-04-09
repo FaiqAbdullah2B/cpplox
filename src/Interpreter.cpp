@@ -13,8 +13,18 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<lox::Stmt>>& state
     }
 }
 
+// LiteralType Interpreter::evaluate(const lox::Expr& expr) {
+//     return std::visit(*this, expr.value);
+// }
+
 LiteralType Interpreter::evaluate(const lox::Expr& expr) {
-    return std::visit(*this, expr.value);
+    const lox::Expr* previousExpr = currentExpr;
+    currentExpr = &expr; // Save the address of the wrapper!
+    
+    LiteralType result = std::visit(*this, expr.value);
+    
+    currentExpr = previousExpr; // Restore as we pop the stack
+    return result;
 }
 
 LiteralType Interpreter::execute(const lox::Stmt& stmt) {
@@ -115,8 +125,21 @@ LiteralType Interpreter::operator()(const lox::While& whileStmt) {
 }
 
 LiteralType Interpreter::operator()(const lox::Assign& assign) {
+    // 1. Evaluate the right side of the equals sign first
     LiteralType value = evaluate(*assign.value);
-    environment->assign(assign.name, value);
+
+    // 2. Check the notebook for the exact location
+    auto it = locals.find(currentExpr);
+    if (it != locals.end()) {
+        // We know exactly where it is. Snipe it.
+        int distance = it->second;
+        environment->assignAt(distance, assign.name, value);
+    } else {
+        // No coordinate? It's a global.
+        globals->assign(assign.name, value);
+    }
+
+    // Assignments evaluate to the assigned value in Lox
     return value;
 }
 
@@ -251,7 +274,23 @@ LiteralType Interpreter::operator()(const lox::Ternary& ternary) {
 }
 
 LiteralType Interpreter::operator()(const lox::Variable& variable) {
-    return environment->get(variable.name);
+    return lookUpVariable(variable.name, currentExpr);
+}
+
+LiteralType Interpreter::lookUpVariable(const Token& name, const lox::Expr* expr) {
+    auto it = locals.find(expr);
+    if (it != locals.end()) {
+        // We found a GPS coordinate! Jump exactly this many levels.
+        int distance = it->second;
+        return environment->getAt(distance, name.lexeme);
+    } else {
+        // Not in the map? It must be a global variable.
+        return globals->get(name);
+    }
+}
+
+void Interpreter::resolve(const lox::Expr* expr, int depth) {
+        locals[expr] = depth;
 }
 
 bool Interpreter::isTruthy(const LiteralType& val) {

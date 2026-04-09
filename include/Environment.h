@@ -20,6 +20,12 @@ public:
     void assign(const Token& name, LiteralType value);
 
     LiteralType get(Token name);
+
+    LiteralType getAt(int distance, const std::string& name);
+    Environment* ancestor(int distance);
+
+    void assignAt(int distance, const Token& name, LiteralType value);
+
 private:
     std::unordered_map<std::string, LiteralType> values;
 };
