@@ -104,38 +104,35 @@ Source Text
 
 ```
 cpplox/
-├── CMakeLists.txt          # Build configuration
-├── src/
-│   ├── main.cpp            # Entry point — REPL and file-execution logic
-│   ├── Lox.hpp / .cpp      # Top-level driver; coordinates the pipeline stages
-│   │
-│   ├── Scanner.hpp / .cpp  # Lexer: source text → token stream
-│   ├── Token.hpp           # Token type + literal value (std::variant)
-│   ├── TokenType.hpp       # Enum class of all token types
-│   │
-│   ├── Expr.hpp            # AST expression node definitions (std::variant)
-│   ├── Stmt.hpp            # AST statement node definitions (std::variant)
-│   │
-│   ├── Parser.hpp / .cpp   # Recursive-descent parser → AST
-│   │
-│   ├── Resolver.hpp / .cpp # Semantic analysis / variable resolution pass
-│   │
-│   ├── Interpreter.hpp     # Tree-walker interpreter; evaluates the AST
-│   ├── Interpreter.cpp
-│   │
-│   ├── Environment.hpp     # Runtime scope chain (variable storage)
+├── CMakeLists.txt          # Coordinates AST metaprogramming and main build
+├── include/                # Public headers defining the interfaces
+│   ├── AstPrinter.h        # AST stringification using std::visit and fold expressions
+│   ├── Environment.h       # Lexical scope state
+│   ├── Files.h             # File I/O utilities
+│   ├── Interpreter.h       # Tree-walking evaluator
+│   ├── Lox.h               # Main driver class
+│   ├── LoxCallable.h       # Interface for functions and classes
+│   ├── LoxFunction.h       # Runtime representation of Lox functions
+│   ├── Parser.h            # Tokens -> AST
+│   ├── Resolver.h          # Semantic analysis pass
+│   ├── ReturnException.h   # Exception for control flow
+│   ├── RuntimeError.h      # Exception types
+│   ├── Scanner.h           # Source text -> Token stream
+│   ├── Token.h             # Token definitions and types
+│   └── TokenType.h         # Enum for token types
+├── src/                    # Implementation files
 │   ├── Environment.cpp
-│   │
-│   ├── LoxCallable.hpp     # Interface for callable objects (functions, classes)
-│   ├── LoxFunction.hpp     # First-class Lox function + closure capture
-│   ├── LoxClass.hpp        # Lox class and instance representation
-│   └── LoxInstance.hpp
-│
-└── examples/
-    ├── hello.lox           # Hello world
-    ├── fibonacci.lox       # Recursive fibonacci
-    ├── closures.lox        # Closure capture demo
-    └── classes.lox         # OOP features demo
+│   ├── Files.cpp
+│   ├── Interpreter.cpp
+│   ├── Lox.cpp             # Top-level driver logic
+│   ├── LoxFunction.cpp
+│   ├── main.cpp            # Entry point, REPL, and file runner
+│   ├── Parser.cpp
+│   ├── Resolver.cpp
+│   ├── Scanner.cpp
+│   └── Token.cpp
+└── tools/
+    └── GenerateAst.cpp     # C++ metaprogramming tool that writes the AST headers
 ```
 
 ---
@@ -164,7 +161,6 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 # 4. Build
 cmake --build . --config Release
 
-# The binary will be at: build/cpplox (Linux/macOS) or build/Release/cpplox.exe (Windows)
 ```
 
 ### Running cpplox
@@ -262,6 +258,7 @@ This project was a deep dive into how programming languages actually work under 
 
 ### Software Engineering
 - How to design a clean pipeline where each stage has a single responsibility
+- How one can use **Meta-programming** to write code that writes code.
 - Error recovery: continuing to parse after a syntax error to surface multiple errors in one pass
 - The value of a **semantic analysis pass** (Resolver) separate from execution — it catches a whole class of errors before any code runs
 
